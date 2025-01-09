@@ -1,3 +1,4 @@
 __pycache__
 images/*
+uploads/*
 full_model_state_dict.pth
