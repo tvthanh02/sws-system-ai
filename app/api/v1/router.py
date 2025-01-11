@@ -1,43 +1,19 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-from model import predict_image, load_model
-import os
-from models import Base, Image
-from database import engine, get_db
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from extensions import upload_image
-import os
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from utils.common import upload_image, load_model_classify, predict_image
+from models.image import Image
+from db import get_db
 from sqlalchemy.orm import Session
 
-# Tạo thư mục nếu chưa tồn tại
-UPLOAD_FOLDER = "./uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+router = APIRouter()
 
-
-app = FastAPI()
-
-mymodel = load_model();
-
-# Khởi tạo cơ sở dữ liệu
-Base.metadata.create_all(bind=engine)
-
-
-
-@app.get("/images/{image_id}")
-def get_image(image_id: int, db: Session = Depends(get_db)):
-    image = db.query(Image).filter(Image.id == image_id).first()
-    if not image:
-        raise HTTPException(status_code=404, detail="Image not found")
-    return {"id": image.id, "filename": image.filename, "path": image.path}
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@app.post("/predict-image")
+@router.post("/predict-image")
 async def predict_single_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    
+    # load classify model
+    semi_classify_model = load_model_classify()
+
     # Tải ảnh lên và lấy thông tin đường dẫn và tên tệp
-    upload_results = await upload_image(file, db)
+    upload_results = await upload_image(file)
     image_filename = upload_results.get("filename")
     image_path = upload_results.get("path")
 
@@ -46,13 +22,12 @@ async def predict_single_image(file: UploadFile = File(...), db: Session = Depen
 
     try:
         # Dự đoán ảnh
-        predicted_data = predict_image(image_path, mymodel)
-        print(predicted_data)  # In ra dữ liệu dự đoán để debug
+        predicted_data = predict_image(image_path, semi_classify_model)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred during prediction: {str(e)}")
 
     # Lấy các giá trị dự đoán
-    predicted, prob = predicted_data.get("predicted"), predicted_data.get("probs")
+    predicted, prob = predicted_data.get("predicted"), predicted_data.get("prob")
   
     # Kiểm tra dữ liệu đã đầy đủ chưa
     if predicted is None or prob is None or len(prob) == 0:

@@ -6,10 +6,10 @@ import os
 
 load_dotenv()
 
-DATABASE_URL = "postgresql://postgres:06122002@localhost/data_images"
-DATABASE_URL_RENDER = os.getenv("DATABASE_URL_RENDER")
+POSTGRES_URL = os.getenv("POSTGRES_URL_CONSTR")
+POSTGRES_URL_RENDER = os.getenv("POSTGRES_URL_RENDER")
 
-engine = create_engine(DATABASE_URL_RENDER)
+engine = create_engine(POSTGRES_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
