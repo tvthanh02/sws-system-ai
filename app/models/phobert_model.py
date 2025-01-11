@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
-from config import PHOBERT_MODEL_NAME
+from app.core.config import PHOBERT_MODEL_NAME
 
 class PhoBERTFeatureExtractor:
     def __init__(self, device):

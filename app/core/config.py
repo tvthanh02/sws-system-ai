@@ -2,11 +2,11 @@ import os
 import os
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
+from pathlib import Path
 # Paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_SAVE_PATH = os.path.join(BASE_DIR, "models", "saved_models", "trained_mt5_model.pth")
-DATASET_PATH = os.path.join(BASE_DIR, "Dataset_200Text_200Anh.csv")
-
+DATASET_PATH = 'D:\sws-system-ai\Dataset_200Text_200Anh.csv'
 # Model configurations
 PHOBERT_MODEL_NAME = "vinai/phobert-base"
 MT5_MODEL_NAME = "google/mt5-base"

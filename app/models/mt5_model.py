@@ -2,7 +2,7 @@ import os
 import torch
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from underthesea import word_tokenize
-from config import (MT5_MODEL_NAME, TEMPERATURE, TOP_P, TOP_K, 
+from app.core.config import (MT5_MODEL_NAME, TEMPERATURE, TOP_P, TOP_K, 
                    REPETITION_PENALTY, GENERATE_LENGTH)
 
 class MT5TextGenerator:

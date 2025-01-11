@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from ..config import RANDOM_STATE
+from app.core.config import RANDOM_STATE
 
 def load_and_split_data(dataset_path):
     try:

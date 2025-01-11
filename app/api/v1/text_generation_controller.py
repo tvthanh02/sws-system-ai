@@ -3,16 +3,16 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import torch
-from ..services.text_generation_service import TextGenerationService
-from ..utils.data_utils import load_and_split_data
-from ..config import DATASET_PATH, MODEL_SAVE_PATH
+from app.services.text_generation_service import TextGenerationService
+from app.utils.data_utils import load_and_split_data
+from app.core.config import DATASET_PATH, MODEL_SAVE_PATH
 
 class Message(BaseModel):
     message: str
 
 def setup_app():
-    app = FastAPI()
     
+    app = FastAPI()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:3000"],

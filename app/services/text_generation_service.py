@@ -3,7 +3,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from models.phobert_model import PhoBERTFeatureExtractor
 from models.mt5_model import MT5TextGenerator
-from config import (BATCH_SIZE, NUM_EPOCHS, LEARNING_RATE, 
+from app.core.config import (BATCH_SIZE, NUM_EPOCHS, LEARNING_RATE, 
                    MAX_LENGTH, MODEL_SAVE_PATH)
 
 class CustomDataset(torch.utils.data.Dataset):

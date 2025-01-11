@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from utils.common import upload_image, load_model_classify, predict_image
 from models.image import Image
 from db import get_db
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
 
 router = APIRouter()
 
