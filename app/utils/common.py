@@ -18,23 +18,48 @@ UPLOAD_FOLDER = './app/public/images'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+def load_model_classify_2():
+    # Tạo mô hình
+    model = ConvNet(INPUT_SIZE, NUM_CLASSES) 
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Tải checkpoint
+    checkpoint = torch.load("app/ml-models/full_model_state_dict.pth", map_location=device)
+    
+    # Xử lý tiền tố 'module.' trong tên các lớp (nếu có)
+    state_dict = checkpoint
+    new_state_dict = {}
+    for key, value in state_dict.items():
+        # Nếu có tiền tố 'module.', loại bỏ nó
+        new_key = key.replace("module.", "")
+        new_state_dict[new_key] = value
+
+    # Tải lại state_dict đã xử lý vào mô hình
+    model.load_state_dict(new_state_dict)
+    
+    return model
 
 def load_model_classify():
     # Tải lại mô hình đã lưu
-   try:
-    # Tải mô hình từ tệp và chuyển nó vào thiết bị (CPU/GPU)
-    model = ConvNet(INPUT_SIZE, NUM_CLASSES)  # Tạo lại mô hình với cùng kiến trúc
-    model.load_state_dict(torch.load("app/ml-models/semi-model-state-dict.pth"))
-    model = model.to(device)
-    model.eval()  # Đặt mô hình vào chế độ đánh giá (evaluation mode)
-    return model
-    
-   except FileNotFoundError:
-    print("Error: The model file was not found.")
-    exit(1)
-   except RuntimeError as e:
-    print(f"Runtime error occurred: {e}")
-    exit(1)
+    try:
+        # Tạo lại mô hình với cùng kiến trúc
+        model = ConvNet(INPUT_SIZE, NUM_CLASSES)   
+        # Tải mô hình từ tệp và chuyển nó vào thiết bị (CPU/GPU)
+        model.load_state_dict(torch.load("app/ml-models/semi-model-state-dict.pth"))
+        model.eval()  # Đặt mô hình vào chế độ đánh giá (evaluation mode)
+        
+        return model
+
+    except FileNotFoundError:
+        print("Error: The model file was not found.")
+        exit(1)
+    except RuntimeError as e:
+        print(f"Runtime error occurred: {e}")
+        exit(1)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        exit(1)
 
 
 async def upload_image(file: UploadFile = File(...)):
