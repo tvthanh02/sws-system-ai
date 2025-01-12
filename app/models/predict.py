@@ -2,11 +2,10 @@ from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.dialects.postgresql import ARRAY
 from app.db import Base
 
-class Image(Base):
-    __tablename__ = "images_data"
+class Predict(Base):
+    __tablename__ = "dudoan"
 
     id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String, unique=True, index=True)
-    path = Column(String, nullable=False)
+    summary = Column(String)
     predicted = Column(Integer, nullable=True)
-    prob = Column(ARRAY(Float), nullable=True) 
+    probs = Column(ARRAY(Float), nullable=True)

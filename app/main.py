@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from db import Base, engine
+from app.db import Base, engine
 from fastapi.staticfiles import StaticFiles
-from api.v1.router import router
+from app.api.v1.router import router
 
 app = FastAPI()
 

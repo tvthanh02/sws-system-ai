@@ -7,7 +7,7 @@ from transformers import AutoTokenizer, AutoModel
 import numpy as np
 import torch.nn as nn
 import timm
-from models.convnet import ConvNet
+from app.models.convnet import ConvNet
 
 PHOBERT_MODEL_NAME = "vinai/phobert-base"
 SWINV2_MODEL_NAME = "swinv2_base_window12_192.ms_in22k"
