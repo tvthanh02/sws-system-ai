@@ -1,4 +1,4 @@
-# from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.dialects.postgresql import ARRAY
 from db import Base
 
