@@ -1,1 +1,5 @@
 __pycache__
+images/*
+uploads/*
+app/public/*
+.env
