@@ -1,11 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from utils.common import upload_image, load_model_classify, predict_image
+from utils.common import upload_image, load_model_classify, predict_image 
 from models.image import Image
 from db import get_db
 from sqlalchemy.orm import Session
-
+from utils.phogpt_utils import classify_text, generate_text
+from schemas.process_schema import ProcessRequest, ProcessResponse
 router = APIRouter()
-
 @router.post("/predict-image")
 async def predict_single_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
     
@@ -54,3 +54,33 @@ async def predict_single_image(file: UploadFile = File(...), db: Session = Depen
         "predicted": image_data.predicted,
         "prob": image_data.prob
     }
+
+    # ví dụ localhost:8000/api/v1/process nhập json chứa : text trả vể json : giống return
+@router.post("/process", response_model=ProcessResponse, tags=["Process"])
+async def process_text(request: ProcessRequest):
+    try:
+        # Kiểm tra nếu không có văn bản
+        if not request.text:
+            raise HTTPException(status_code=400, detail="Text is required")
+
+        # Phân loại nội dung
+        is_anti_state = classify_text(request.text)
+        
+        if is_anti_state:
+            return {
+                "title": request.text,
+                "isAntiState": True,
+                "generated_text": "Nội dung không được phép xử lý."
+            }
+        else:
+            # Sinh văn bản nếu không phải nội dung phản động
+            generated_text = generate_text(request.text)
+            return {
+                "title": request.text,
+                "isAntiState": False,
+                "generated_text": generated_text
+            }
+    
+    except Exception as e:
+        # Nếu có lỗi trong quá trình xử lý, trả về lỗi 500
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
