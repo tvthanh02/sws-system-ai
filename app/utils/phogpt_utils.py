@@ -139,7 +139,7 @@ def classify_text(text: str) -> bool:
 
 
 
-# =================== SINH VĂN BẢN =================== #
+
 # =================== SINH VĂN BẢN =================== #
 def generate_text(text: str) -> str:
    """
