@@ -94,11 +94,44 @@ def classify_text(text: str) -> bool:
 
 
 # =================== SINH VĂN BẢN =================== #
-def generate_text(text: str) -> str:
-   """
-   Sinh văn bản mới từ mô hình PhoGPT-4B.
-   Trả về văn bản được sinh ra từ prompt đầu vào.
-   """
-   # Move model and tokenizer to the same device
-   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-   tokenizer = AutoTokenizer.from_pretrained(PHOGPT_MODEL_NAME)
+def generate_text(prompt: str, max_length: int = 100) -> str:
+    """
+    Sinh văn bản mới từ mô hình PhoGPT-4B.
+    Trả về văn bản được sinh ra từ prompt đầu vào.
+    
+    Args:
+        prompt (str): Văn bản đầu vào (prompt).
+        max_length (int): Độ dài tối đa của văn bản được sinh.
+        
+    Returns:
+        str: Văn bản được sinh.
+    """
+    # Kiểm tra và thiết lập thiết bị
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Load tokenizer và model PhoGPT
+    tokenizer = AutoTokenizer.from_pretrained(PHOGPT_MODEL_NAME)
+    model = AutoModelForCausalLM.from_pretrained(PHOGPT_MODEL_NAME)
+    
+    # Đưa model về thiết bị (CPU/GPU)
+    model.to(device)
+    model.eval()
+    
+    # Tokenize prompt đầu vào
+    input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
+    
+    # Sinh văn bản mới
+    output = model.generate(
+        input_ids=input_ids,
+        max_length=max_length,
+        num_return_sequences=1,  # Số lượng kết quả muốn sinh
+        no_repeat_ngram_size=2,  # Tránh lặp từ/ngữ
+        top_k=50,                # Lấy top-k token có xác suất cao nhất
+        top_p=0.95,              # Nucleus sampling (lấy xác suất tích lũy <= 0.95)
+        temperature=0.7,         # Tăng tính đa dạng của văn bản sinh ra
+        do_sample=True           # Bật chế độ sinh ngẫu nhiên
+    )
+    
+    # Giải mã output
+    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
+    return generated_text

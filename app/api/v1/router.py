@@ -1,5 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from utils.common import upload_image, load_model_classify, predict_image 
+from fastapi import APIRouter, Query, UploadFile, File, HTTPException, Depends
+from utils.common import upload_image, load_model_classify, predict_image
 from models.image import Image
 from db import get_db
 from sqlalchemy.orm import Session
@@ -55,8 +55,71 @@ async def predict_single_image(file: UploadFile = File(...), db: Session = Depen
         "prob": image_data.prob
     }
 
+@router.get("/images")
+def get_images(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    try:
+        # Tính toán offset và tổng số ảnh
+        offset = (page - 1) * limit
+        total = db.query(Image).count()
+        total_pages = (total + limit - 1) // limit  # Tính số trang
+
+        # Lấy danh sách ảnh với phân trang
+        images = (
+            db.query(Image)
+            .order_by(Image.id.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+        # Chuẩn bị response
+        response = {
+            "data": [
+                {
+                    "_id": image.id,
+                    "image": image.path,
+                    "predicted": image.predicted,
+                    "prob": image.prob,
+                    "created_at": None,  # Nếu cần thêm `created_at` thì cần sửa model
+                    "updated_at": None,  # Tương tự với `updated_at`
+                }
+                for image in images
+            ],
+            "meta": {
+                "total": total,
+                "currentPage": page,
+                "totalPages": total_pages,
+                "limit": limit,
+            },
+        }
+
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/images/{image_id}")
+def delete_image(image_id: int, db: Session = Depends(get_db)):
+    try:
+        # Tìm ảnh cần xóa
+        image = db.query(Image).filter(Image.id == image_id).first()
+        if not image:
+            raise HTTPException(status_code=404, detail="Image not found")
+
+        # Xóa ảnh khỏi cơ sở dữ liệu
+        db.delete(image)
+        db.commit()
+
+        return {"message": f"Image with ID {image_id} deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     # ví dụ localhost:8000/api/v1/process nhập json chứa : text trả vể json : giống return
-@router.post("/process", response_model=ProcessResponse, tags=["Process"])
+@router.post("/generate-text", response_model=ProcessResponse, tags=["Process"])
 async def process_text(request: ProcessRequest):
     try:
         # Kiểm tra nếu không có văn bản

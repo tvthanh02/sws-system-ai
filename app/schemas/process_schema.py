@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
         # Định nghĩa schema cho dữ liệu yêu cầu (request)
 class ProcessRequest(BaseModel):
@@ -7,4 +8,4 @@ class ProcessRequest(BaseModel):
 class ProcessResponse(BaseModel):
     title: str
     isAntiState: bool
-    generated_text: str
+    generated_text: Optional[str]
