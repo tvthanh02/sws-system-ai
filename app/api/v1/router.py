@@ -5,7 +5,14 @@ from db import get_db
 from sqlalchemy.orm import Session
 from utils.phogpt_utils import classify_text, generate_text
 from schemas.process_schema import ProcessRequest, ProcessResponse
+from core.security import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES , get_current_user
+from schemas.user_schema import UserCreate , LoginRequest
+from services.user_services import get_user_by_account, create_user, verify_password
+from utils.hash import verify_password
+from models.user_model import User
+
 router = APIRouter()
+
 @router.post("/predict-image")
 async def predict_single_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
     
@@ -84,3 +91,25 @@ async def process_text(request: ProcessRequest):
     except Exception as e:
         # Nếu có lỗi trong quá trình xử lý, trả về lỗi 500
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+
+    # ví dụ localhost:8000/api/v1/token nhập json chứa : account, password trả vể json : access_token, token_type
+@router.post("/login")
+def login(request: LoginRequest, db: Session = Depends(get_db)):
+    user = get_user_by_account(db, account=request.account)
+    if not user or not verify_password(request.password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    access_token = create_access_token(data={"sub": user.account})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+    # ví dụ localhost:8000/api/v1/register nhập json chứa : account, password, role trả vể json : id, account, role
+@router.post("/register")
+def register(user: UserCreate, db: Session = Depends(get_db)):
+    if get_user_by_account(db, user.account):
+        raise HTTPException(status_code=400, detail="Account already registered")
+    return create_user(db, user)
+
+    # ví dụ localhost:8000/api/v1/protected-endpoint nhập json chứa : access_token trả vể json : message
+@router.get("/protected-endpoint")
+def protected_route(current_user: User = Depends(get_current_user)):
+    return {"message": f"Hello {current_user.account}, you are authorized!"}

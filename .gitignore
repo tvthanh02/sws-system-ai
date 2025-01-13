@@ -3,3 +3,5 @@ images/*
 uploads/*
 app/public/*
 .env
+app/Dataset_200Text_200Anh.csv
+.venv

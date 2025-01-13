@@ -67,3 +67,6 @@ uvicorn==0.34.0
 watchfiles==1.0.3
 websockets==14.1
 underthesea
+python-jose
+passlib
+passlib[bcrypt]
