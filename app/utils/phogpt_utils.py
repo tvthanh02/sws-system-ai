@@ -40,7 +40,7 @@ def read_dataset():
   Đọc dữ liệu từ file CSV và trả về DataFrame.
   """
   try:
-      data = pd.read_csv("Dataset_Text_Anh_8000_v1.csv", encoding='utf-8')
+      data = pd.read_csv("Dataset_200Text_200Anh.csv", encoding='utf-8')
       return data
   except Exception as e:
       print(f"Lỗi khi đọc file: {str(e)}")
