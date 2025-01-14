@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.dialects.postgresql import ARRAY
-from app.db import Base
+from db import Base
 
 class Image(Base):
     __tablename__ = "images_data"

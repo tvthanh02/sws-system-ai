@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from app.models.predict import Predict
-from app.db import get_db
+from models.predict import Predict
+from db import get_db
 
 class PredictRepository:
     def __init__(self, db: Session = Depends(get_db)):

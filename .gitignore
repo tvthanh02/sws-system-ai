@@ -3,3 +3,4 @@ images/*
 uploads/*
 app/public/*
 .env
+venv/*

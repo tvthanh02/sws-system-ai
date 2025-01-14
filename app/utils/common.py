@@ -7,7 +7,7 @@ from transformers import AutoTokenizer, AutoModel
 import numpy as np
 import torch.nn as nn
 import timm
-from app.models.convnet import ConvNet
+from models.convnet import ConvNet
 
 PHOBERT_MODEL_NAME = "vinai/phobert-base"
 SWINV2_MODEL_NAME = "swinv2_base_window12_192.ms_in22k"
@@ -17,7 +17,6 @@ INPUT_SIZE = 1792
 UPLOAD_FOLDER = './app/public/images'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
 def load_model_classify():
     # Tải lại mô hình đã lưu

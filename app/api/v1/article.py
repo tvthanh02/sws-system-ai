@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from app.services.article_service import ArticleService
-from app.schemas.articles_schemas import ArticlesResponseSchema
-from app.db import get_db
+from services.article_service import ArticleService
+from schemas.articles_schemas import ArticlesResponseSchema
+from db import get_db
 from sqlalchemy.orm import Session
 
 router = APIRouter()

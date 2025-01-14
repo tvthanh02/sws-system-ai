@@ -9,4 +9,4 @@ class ArticlesResponseSchema(BaseModel):
     # predicted: str
 
     class Config:
-        orm_mode = True  # Cho phép chuyển đổi từ các model SQLAlchemy
+        orm_mode = True  # Cho phép chuyển đổi từ các model SQLAlchemy        

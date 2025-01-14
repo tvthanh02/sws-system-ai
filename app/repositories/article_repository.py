@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from app.models.dantri_articles import DantriArticles
-from app.models.predict import Predict
-from app.db import get_db
+from models.dantri_articles import DantriArticles
+from models.predict import Predict
+from db import get_db
 
 class ArticleRepository:
     def __init__(self, db: Session = Depends(get_db)):
@@ -14,3 +14,11 @@ class ArticleRepository:
 
     def get_article_by_id(self, article_id):
         return self.db.query(DantriArticles).filter(DantriArticles.id == article_id).first()
+    
+    def delete_article_by_id(self,article_id):
+        article=self.db.query(DantriArticles).filter(DantriArticles.id == article_id).first()
+        if article:
+            self.db.delete(article)
+            self.db.commit()
+            return True
+        return False
