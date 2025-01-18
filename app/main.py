@@ -1,9 +1,19 @@
 from fastapi import FastAPI
 from db import Base, engine
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from api.v1.router import router
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Chấp nhận tất cả origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Cho phép tất cả các phương thức HTTP (GET, POST, PUT, DELETE, ...)
+    allow_headers=["*"],  # Cho phép tất cả các headers
+)
 
 # Mount thư mục static vào route `/static`
 # app.mount("/public", StaticFiles(directory="app/public"), name="public")
