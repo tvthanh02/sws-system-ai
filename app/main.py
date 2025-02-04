@@ -6,7 +6,7 @@ from api.v1.router import router
 app = FastAPI()
 
 # Mount thư mục static vào route `/static`
-app.mount("/public", StaticFiles(directory="app/public"), name="public")
+# app.mount("/public", StaticFiles(directory="app/public"), name="public")
 
 # Gắn router chính vào ứng dụng
 app.include_router(router, prefix="/api/v1")
@@ -17,7 +17,7 @@ Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
 
 

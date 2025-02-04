@@ -1,10 +1,30 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 from utils.common import upload_image, load_model_classify, predict_image
-from models.image import Image
+from models.image import Image 
 from db import get_db
 from sqlalchemy.orm import Session
+from services.article_service import ArticleService
+from schemas.articles_schemas import ArticlesResponseSchema
+import pytesseract
+import os
+from fastapi.responses import JSONResponse
+from pdf2image import convert_from_path
+from PIL import Image 
+from models.ocr import UploadedFile
 
 router = APIRouter()
+
+# Thư mục tạm để lưu file
+UPLOAD_FOLDER = "./uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Đường dẫn Poppler (cần thiết nếu bạn dùng Windows)
+# POPLER_PATH = r"C:\Program Files\Poppler\poppler-24.08.0\Library\bin"
+
+
+@router.get("/test")
+def test():
+    return {"message": "Hello World"}
 
 @router.post("/predict-image")
 async def predict_single_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -54,3 +74,72 @@ async def predict_single_image(file: UploadFile = File(...), db: Session = Depen
         "predicted": image_data.predicted,
         "prob": image_data.prob
     }
+
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
+
+    # Kiểm tra file hợp lệ
+    if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.pdf')):
+        raise HTTPException(status_code=400, detail="Unsupported file format")
+
+    # Đường dẫn đầy đủ để lưu file trong thư mục upload
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    try:
+        # Lưu file vào thư mục
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+
+
+        # Phân loại và xử lý OCR
+        if file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
+            text = process_image(file_path)
+        elif file.filename.lower().endswith('.pdf'):
+            text = process_pdf(file_path)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format")
+        
+        # Lưu thông tin vào cơ sở dữ liệu
+        uploaded_file = UploadedFile(
+            filename=file.filename,
+            text=text
+        )
+        db.add(uploaded_file)
+        db.commit()
+        db.refresh(uploaded_file)
+
+        return JSONResponse(content={
+            "id": uploaded_file.id,
+            "filename": uploaded_file.filename,
+            "text": uploaded_file.text
+            })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+
+    finally:
+        # Xóa file tạm
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
+def process_image(image_path: str) -> str:
+    """
+    Xử lý OCR trên file ảnh.
+    """
+    img = Image.open(image_path)
+    text = pytesseract.image_to_string(img, lang='vie')
+    return text
+
+
+def process_pdf(pdf_path: str) -> str:
+    """
+    Xử lý OCR trên file PDF bằng cách chuyển PDF sang ảnh.
+    """
+    images = convert_from_path(pdf_path, dpi=300)
+    text = ""
+    for page_number, image in enumerate(images, start=1):
+        page_text = pytesseract.image_to_string(image, lang='vie')
+        text += f"\n--- Page {page_number} ---\n"
+        text += page_text
+    return text

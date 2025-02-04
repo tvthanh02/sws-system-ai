@@ -6,8 +6,8 @@ import os
 
 load_dotenv()
 
-POSTGRES_URL = os.getenv("POSTGRES_URL_CONSTR")
-POSTGRES_URL_RENDER = os.getenv("POSTGRES_URL_RENDER")
+POSTGRES_URL = os.getenv("POSTGRES_URL")
+# POSTGRES_URL_RENDER = os.getenv("POSTGRES_URL_RENDER")
 
 engine = create_engine(POSTGRES_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
