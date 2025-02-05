@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from services.article_service import ArticleService
 from schemas.articles_schemas import ArticlesResponseSchema
 import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 import os
 from fastapi.responses import JSONResponse
 from pdf2image import convert_from_path
@@ -75,7 +76,7 @@ async def predict_single_image(file: UploadFile = File(...), db: Session = Depen
         "prob": image_data.prob
     }
 
-@router.post("/upload")
+@router.post("/ocr")
 async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     # Kiểm tra file hợp lệ
@@ -100,18 +101,18 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db
             raise HTTPException(status_code=400, detail="Unsupported file format")
         
         # Lưu thông tin vào cơ sở dữ liệu
-        uploaded_file = UploadedFile(
-            filename=file.filename,
-            text=text
-        )
-        db.add(uploaded_file)
-        db.commit()
-        db.refresh(uploaded_file)
+        # uploaded_file = UploadedFile(
+        #     filename=file.filename,
+        #     text=text
+        # )
+        # db.add(uploaded_file)
+        # db.commit()
+        # db.refresh(uploaded_file)
 
         return JSONResponse(content={
-            "id": uploaded_file.id,
-            "filename": uploaded_file.filename,
-            "text": uploaded_file.text
+            # "id": uploaded_file.id,
+            # "filename": uploaded_file.filename,
+            "text": text
             })
 
     except Exception as e:
